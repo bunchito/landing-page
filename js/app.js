@@ -47,8 +47,6 @@ let timer;
 
 /**
  * Retrieves if the view correspond to a mobile or desktop menu
- * @param  {Number} width The inner width of the window
- * @return {String}       Either 'mobile' or 'desktop'
  */
 const widthType = (width) => {
   if (width <= 1024) {
@@ -58,8 +56,7 @@ const widthType = (width) => {
 }
 
 /**
- * 
- * @param  {Number} width The inner width of the window
+ * Scrolls to a particular position (Y axis)
  */
 const scrollToHelper = (screenWidth, elementId, listofElementsById, spaceForMenu) => {
     // Scroll to anchor ID using scrollTo() event
@@ -73,7 +70,6 @@ const scrollToHelper = (screenWidth, elementId, listofElementsById, spaceForMenu
 
 /**
  * Handler for click listener
- * @param  {HTMLLIElement} target The clicked LI
  */
 const onClickHandler = ({ target }) => {
   if (target.nodeName === 'LI' && target.textContent.toLowerCase().includes('section')) {
@@ -82,6 +78,9 @@ const onClickHandler = ({ target }) => {
   }
 }
 
+/**
+ * Parses the scrapped markup 
+ */
 const parseData = (sections) => {
   const result = [];
   for (let section of sections) {
@@ -111,9 +110,7 @@ const parseData = (sections) => {
 parsedSectionData = parseData(sections);
 
 /**
- * Parses parsedSectionData
- * @param  {Array} parsedSectionData The parsed data of Sections collections
- * @return {Object}                  Containing the [Section Id]: xOffset
+ * Parses parsedSectionData to a collection if section id (keys) and offsetTop (y position) as value
  */
 const parsedSectionOffsets = (parsedSectionData) => {
   const result = {};
@@ -130,22 +127,25 @@ const parsedSectionOffsets = (parsedSectionData) => {
 
 sectionsOffsets = parsedSectionOffsets(parsedSectionData);
 
-
-// Remove ALL classes and add class to element
+/**
+ * Removes the class active from a list of elements. I could improve this passing the class, 
+ * to have more flexibility an can reuse the code
+ */
 const removeClasses = (listOfElements) => {
   for (let element of listOfElements) {
     element.classList.remove('active');
   }
 }
 
+/**
+ * Adds the class active to a particular element
+ */
 const addClassToElement = (elementId) => {
   document.querySelector(`main section[id=${elementId}]`).classList.add('active');
 }
 
 /**
  * Toggle visibility of Mobile Menu
- * @param  {Node} navContainer The menu wrapper
- * @param  {Node} toggle   The element that toggles
  */
 const onToggleMenu = (navContainer, toggle) => {
   if (navContainer.classList.contains('active')) {
@@ -172,6 +172,9 @@ const onResizeWindow = () => {
   intFrameWidth = window.innerWidth;
 }
 
+/**
+ * Highlights with a class the current section once we end scrolling (with setTimeout() or bounced to improve performance)
+ */
 const onScrollWindow = () => {
   // KUDOS to https://stackoverflow.com/questions/4620906/how-do-i-know-when-ive-stopped-scrolling/4620986#4620986
   if (timer) {
@@ -201,8 +204,6 @@ const onScrollWindow = () => {
 
 /**
  * Builds the menu or nav
- * @param  {Array} parsedSectionData The parsed data of Sections collections (parsedSectionData)
- * @return {String}                  Stringified markup for menu
  */
 const navItems = (data) => {
   // Want to be extra careful and just match sections with ids section*
