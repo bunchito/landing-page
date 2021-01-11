@@ -1,0 +1,12 @@
+/* Theme */
+:root {
+  --dark-blue: #272643;
+  --medium-blue: #2c698d;
+  --light-blue: #e3f6f5;
+  --clear-blue: #e3f6f5;
+  --white: #ffffff;
+  --base-padding: 10px;
+  --base-margin: 10px;
+  --base-2x-margin: 20px;
+  --base-font-size: 16px;
+}
