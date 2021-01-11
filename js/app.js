@@ -27,7 +27,7 @@ let intFrameWidth;
 const spaceForMenu = {
   desktop: 0,
   mobile: 190
-}
+};
 
 /*
 The toggle button is added dynamically (not part of the markup). I'm targeting when it is in the DOM.
@@ -37,7 +37,7 @@ let toggle;
 
 let parsedSectionData;
 
-// const scrollingInfo = {};
+let timer;
 
 /**
  * End Global Variables
@@ -52,10 +52,9 @@ let parsedSectionData;
  */
 const widthType = (width) => {
   if (width <= 1024) {
-    console.log('Yes')
-    return 'mobile'
+    return 'mobile';
   }
-  return 'desktop'
+  return 'desktop';
 }
 
 /**
@@ -65,8 +64,6 @@ const widthType = (width) => {
 const scrollToHelper = (screenWidth, elementId, listofElementsById, spaceForMenu) => {
     // Scroll to anchor ID using scrollTo() event
     // I wanted to use scrollIntoView() but the code says scrollTo()
-    console.log(widthType(screenWidth))
-    console.log(spaceForMenu[widthType(screenWidth)])
     const scrollTo = listofElementsById[elementId] - 40 - spaceForMenu[widthType(screenWidth)];
     window.scrollTo({
       top: scrollTo,
@@ -89,26 +86,13 @@ const parseData = (sections) => {
   const result = [];
   for (let section of sections) {
     const {
-      attributes,
-      childNodes,
-      children,
       classList,
-      clientHeight,
-      clientWidth,
       dataset: {
         nav
       },
-      id,
-      innerHTML,
-      innerText,
-      nodeName,
       offsetTop
     } = section;
-    result.push({
-      section: nav,
-      class: classList.value,
-      offsetTop
-    })
+    result.push({ section: nav, class: classList.value, offsetTop });
   }
   return result;
 }
@@ -116,7 +100,7 @@ const parseData = (sections) => {
 /** 
  * This is a sample shape of parsedSectionData
   [
-    {section: "Section 1", class: "your-active-class", offsetTop: 465},
+    {section: "Section 1", class: "", offsetTop: 465},
     {section: "Section 2", class: "", offsetTop: 986},
     {section: "Section 3", class: "", offsetTop: 1506},
     {section: "Section 4", class: "", offsetTop: 2027},
@@ -146,13 +130,24 @@ const parsedSectionOffsets = (parsedSectionData) => {
 
 sectionsOffsets = parsedSectionOffsets(parsedSectionData);
 
+
+// Remove ALL classes and add class to element
+const removeClasses = (listOfElements) => {
+  for (let element of listOfElements) {
+    element.classList.remove('active');
+  }
+}
+
+const addClassToElement = (elementId) => {
+  document.querySelector(`main section[id=${elementId}]`).classList.add('active');
+}
+
 /**
  * Toggle visibility of Mobile Menu
  * @param  {Node} navContainer The menu wrapper
  * @param  {Node} toggle   The element that toggles
  */
 const onToggleMenu = (navContainer, toggle) => {
-  console.log('Toggling!')
   if (navContainer.classList.contains('active')) {
     navContainer.classList.remove('active');
     toggle.classList.remove('fa-times');
@@ -177,12 +172,26 @@ const onResizeWindow = () => {
   intFrameWidth = window.innerWidth;
 }
 
-const onScrollDocument = (evt) => {
-  // console.log('Scrolling!')
-  // console.log(evt);
-}
+const onScrollWindow = () => {
+  // KUDOS to https://stackoverflow.com/questions/4620906/how-do-i-know-when-ive-stopped-scrolling/4620986#4620986
+  if (timer) {
+    clearTimeout(timer);
+  }
+  timer = setTimeout(function() {
+    
+  for (let offSet in sectionsOffsets) {
+    const currentScrollingPosition = window.scrollY;
 
+    if (currentScrollingPosition < sectionsOffsets[offSet]) {
+      removeClasses(sections);
 
+      // Add class 'active' to section when near top of viewport
+      addClassToElement(offSet.toLowerCase().split(' ').join(''))
+      break;
+    }
+  }
+  }, 150);
+};
 
 /**
  * End Helper Functions
@@ -199,23 +208,11 @@ const navItems = (data) => {
   // Want to be extra careful and just match sections with ids section*
   let navStructure = '';
   for (let item of data) {
-    navStructure += `<li class="item">${item.section}</li>`
+    navStructure += `<li class="item">${item.section}</li>`;
   }
   return navStructure;
 }
 
-
-// Add class 'active' to section when near top of viewport
-
-
-
-
-
-/**
- * End Main Functions
- * Begin Events
- * 
- */
 
 // Build menu 
 
@@ -232,13 +229,10 @@ toggle = document.querySelector('ul > li.toggle i.fas');
 intFrameWidth = window.innerWidth;
 
 
-
-
-// Set sections as active
-
-
 /**
- * Listeners
+ * End Main Functions
+ * Begin Listeners
+ * 
  */
 
 navContainer.addEventListener('click', onClickHandler);
@@ -248,4 +242,5 @@ toggle.addEventListener('click', onToggleMenu.bind(null, navContainer, toggle));
 // We adjust the scrollTo values if user resizes the window
 window.addEventListener('resize', onResizeWindow);
 
-document.addEventListener('scroll', onScrollDocument);
+// Set sections as active (once the "scrolling finishes")
+window.addEventListener('scroll', onScrollWindow);
